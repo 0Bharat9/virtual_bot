@@ -245,7 +245,7 @@ def suppress_alsa_warnings():
 # Function to transcribe audio using Faster Whisper
 def transcribe_audio(wav_path):
     while not os.path.exists(wav_path):
-        print("wav_path not found")
+        #print("wav_path not found")
         time.sleep(1)
     
     print("file found.... starting transcription process")
@@ -436,28 +436,32 @@ class ConversationManager:
         {json.dumps(self.medical_form, indent=4)}"""
         
         self.gemini_response = self.filler.run_gemini(prompt)
+        extracted = True
+        count = 0
+        while extracted and count in range(3):
+            if self.gemini_response:
+                # Extract the JSON from the Gemini response
+                extracted_json = self.filler.extract_json(self.gemini_response)
 
-        if self.gemini_response:
-            # Extract the JSON from the Gemini response
-            extracted_json = self.filler.extract_json(self.gemini_response)
-
-            if extracted_json:
-                # Merge the extracted fields with the existing JSON
-                for key, value in extracted_json.items():
-                    if isinstance(value, dict):
-                        # Update nested dictionaries
-                        self.medical_form[key].update(value)
-                    else:
-                        self.medical_form[key] = value
-
-                # Save the updated JSON to the file
-                self.filler.save_json(self.medical_form)
-                print("Updated medical form saved successfully.")
-            else:
-                print("No valid JSON extracted from Gemini output.")
-        else:
-            print("No output from Gemini.")
- 
+                if extracted_json:
+                    # Merge the extracted fields with the existing JSON
+                    for key, value in extracted_json.items():
+                        if isinstance(value, dict):
+                            # Update nested dictionaries
+                            self.medical_form[key].update(value)
+                        else:
+                            self.medical_form[key] = value
+                    
+                    # Save the updated JSON to the file
+                    self.filler.save_json(self.medical_form)
+                    print("Updated medical form saved successfully.")
+                    extracted = False
+                else:
+                    print("No valid JSON extracted from Gemini response.")
+                    count += 1
+	
+	     
 if __name__ == "__main__":
     manager = ConversationManager()
     asyncio.run(manager.main())
+

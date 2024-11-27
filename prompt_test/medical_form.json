@@ -1,0 +1,9 @@
+{
+    "patient_info": {
+        "name": "Bharat Deep Singh",
+        "age": "20",
+        "symptoms": "runny nose and sore throat",
+        "symptom_duration": "two to three days",
+        "symptoms_severity": "low"
+    }
+}
